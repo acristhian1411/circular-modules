@@ -45,7 +45,7 @@ src/
 ├── main.jsx                  # Entrada de la app
 ```
 ## 🧪 Estado del proyecto
-✅ CRUD de componentes
-✅ Visualización de dependencias
-⏳ Agregar dependencia vía interfaz
-⏳ Autenticación y roles (pendiente)
+- ✅ CRUD de componentes
+- ✅ Visualización de dependencias
+- ⏳ Agregar dependencia vía interfaz
+- ⏳ Autenticación y roles (pendiente)
