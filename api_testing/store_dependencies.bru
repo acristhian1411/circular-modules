@@ -1,0 +1,21 @@
+meta {
+  name: store_dependencies
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:3001/api/components/1/dependencies
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "depends_on_id": 2
+  }
+}

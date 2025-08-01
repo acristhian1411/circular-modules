@@ -1,0 +1,24 @@
+meta {
+  name: update a component
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:3001/api/components/1
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "usuarios",
+    "type": "modulo",
+    "description": "modulo para manejo de usuarios",
+    "parent_id": null
+  }
+}

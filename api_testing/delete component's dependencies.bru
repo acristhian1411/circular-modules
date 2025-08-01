@@ -1,0 +1,15 @@
+meta {
+  name: delete component's dependencies
+  type: http
+  seq: 4
+}
+
+delete {
+  url: http://localhost:3001/api/components/1/dependencies/2
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
