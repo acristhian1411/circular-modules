@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getComponentWithDependencies } from '../api';
+import { getComponentWithDependencies, addDependency  } from '../api';
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import {
   DialogActions
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ComponentGraph from './ComponentGraph';
 
 /**
  * Muestra un componente con sus dependencias
@@ -27,6 +28,7 @@ export default function ShowDependencies({ component }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [graphOpen, setGraphOpen] = useState(false);
 
   useEffect(() => {
     const fetchDependencies = async () => {
@@ -56,10 +58,21 @@ export default function ShowDependencies({ component }) {
                 startIcon={<AddIcon />}
                 onClick={() => {
                 // Abrí un modal, redirigí, o dispará tu lógica para agregar dependencia
-                setDialogOpen(true);
+                setGraphOpen(true);
                 }}
             >
                 Agregar dependencia
+            </Button>
+            <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                // Abrí un modal, redirigí, o dispará tu lógica para agregar dependencia
+                setDialogOpen(true);
+                }}
+            >
+                Mostrar dependencia
             </Button>
         </Stack>
         {component.description && (
@@ -94,29 +107,68 @@ export default function ShowDependencies({ component }) {
         )}
       </CardContent>
     </Card>
-    {addDependencies(dialogOpen, setDialogOpen)}
+    {addDependencies(dialogOpen, setDialogOpen, component.id)}
+    {showGraph(component.id, component.name, graphOpen, setGraphOpen)}
 
     </div>
 
   );
 }
 
-function addDependencies(dialogOpen, setDialogOpen){
-
+function addDependencies(dialogOpen, setDialogOpen,componentId){
+  const [dependencyId, setDependencyId] = useState('');
+ const insertDependency = async (componentId, dependencyId) => {
+    try {
+      const response = await addDependency(componentId, dependencyId);
+      console.log('Dependency added:', response);
+      // Aquí podrías actualizar el estado para reflejar el cambio en la UI
+    } catch (error) {
+      console.error('Error adding dependency:', error);
+    }
+ }
   return (
     <div>
         <Dialog open={dialogOpen} onClose={()=>setDialogOpen(false)}>
             <DialogTitle>Agregar dependencia</DialogTitle>
             <DialogContent>
-                <p>
-                  Algo
-                </p>
+                <form>
+                  <Stack spacing={2}>
+                    <Typography variant="body2">Selecciona el componente a agregar como dependencia:</Typography>
+                    <input
+                      type="text"
+                      placeholder="ID o nombre del componente"
+                      style={{ padding: '8px', width: '100%' }}
+                      value={dependencyId}
+                      onChange={(e) => setDependencyId(e.target.value)}
+                      // Puedes agregar un estado para manejar el valor del input
+                    />
+                    {/* Si tienes una lista de componentes, podrías usar un select en vez de input */}
+                  </Stack>
+                </form>
                 <DialogActions>
                     <Button onClick={()=>setDialogOpen(false)}>Cancelar</Button>
-                    <Button onClick={()=>setDialogOpen(false)}>Aceptar</Button>
+                    <Button onClick={()=>insertDependency(componentId,dependencyId)}>Aceptar</Button>
                 </DialogActions>
             </DialogContent>
         </Dialog>
     </div>
   )
+}
+
+function showGraph(id, name, dialogOpen, setDialogOpen){
+
+  return (
+    <div>
+        <Dialog open={dialogOpen} onClose={()=>setDialogOpen(false)} maxWidth="md" fullWidth>
+            <DialogTitle>Dependencias de {name}</DialogTitle>
+            <DialogContent>
+                <ComponentGraph component={{id, name}} />
+                <DialogActions>
+                    <Button onClick={()=>setDialogOpen(false)}>Cerrar</Button>
+                </DialogActions>
+            </DialogContent>
+        </Dialog>
+    </div>
+  )
+
 }

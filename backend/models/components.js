@@ -88,6 +88,34 @@ export const getDependencies = async (db, component_id) => {
   return dependencies;
 };
 
+export const getDependents = async (db, component_id) => {
+  const mainComponent = await db.get(
+    `SELECT * FROM components WHERE id = ?`,
+    [component_id]
+  );
+
+  if (!mainComponent) {
+    throw new Error('Componente no encontrado');
+  }
+
+  // Traer las dependencias del componente
+  const dependencies = await db.all(
+    `SELECT c.*
+     FROM components c
+     JOIN component_dependencies d ON d.depends_on_id = c.id
+     WHERE d.component_id = ?`,
+    [component_id]
+  );
+
+  // Retornar en el formato pedido
+  return [
+    {
+      ...mainComponent,
+      dependencies: dependencies || []
+    }
+  ];
+}
+
 export const deleteDependency = async (db, depends_on_id) => {
   const result = await db.run(
     'DELETE FROM component_dependencies WHERE depends_on_id = ?',

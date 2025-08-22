@@ -10,6 +10,26 @@ export async function fetchComponents() {
   return res.json();
 }
 
+export async function addDependency(componentId, dependencyId) {
+    const res = await fetch(`${API_BASE}/components/${componentId}/dependencies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dependencyId }),
+    }
+    );
+    return res.json();
+}
+
+export async function getDependencies(componentId) {
+    const res = await fetch(`${API_BASE}/components/${componentId}/dependencies`);
+    return res.json();
+}
+
+export async function getDependents(componentId) {
+    const res = await fetch(`${API_BASE}/components/${componentId}/getDependents`);
+    return res.json();
+}
+
 /**
  * Creates a new component
  * @param {Object} data - The component data to create

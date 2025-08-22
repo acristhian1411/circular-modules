@@ -10,6 +10,7 @@ import {
   updateComponent,
   deleteComponent,
   deleteDependency,
+  getDependents
 } from '../models/components.js';
 
 export const componentRouter = (db) => {
@@ -80,7 +81,8 @@ export const componentRouter = (db) => {
 
   router.post('/:id/dependencies', async (req, res) => {
     try {
-      const { depends_on_id } = req.body;
+      const depends_on_id  = req.body.dependencyId;
+      console.log('Adding dependency:', { componentId: req.params.id,  });
       const result = await addDependency(db, req.params.id, depends_on_id);
       res.status(201).json(result);
     } catch (error) {
@@ -105,6 +107,16 @@ export const componentRouter = (db) => {
       res.status(500).json({ error: error.message, message: 'No se pudo eliminar la dependencia' });
     }
   });
+
+  router.get('/:id/getDependents', async (req, res) => {
+    console.log('Fetching dependents for component ID:', req.params.id);
+    try {
+      const dependents = await getDependents(db, req.params.id);
+      res.json(dependents || []);
+    } catch (error) {
+      res.status(404).json({ error: error.message, message: 'No se encontraron datos' });
+    }
+  })
 
   return router;
 };
