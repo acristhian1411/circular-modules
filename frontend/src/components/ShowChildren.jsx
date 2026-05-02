@@ -29,7 +29,7 @@ export default function ShowChildren({ component }) {
         getComponentChildren(component.id).then((data)=>{
             setChildren(data || []);
         });
-      } catch (err) {
+      } catch {
         setError('Error al cargar hijos');
       } finally {
         setLoading(false);

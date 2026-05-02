@@ -34,9 +34,9 @@ export default function ShowDependencies({ component }) {
     const fetchDependencies = async () => {
       try {
         getComponentWithDependencies(component.id).then((data)=>{
-            setDependencies(data.dependencies || []);
+            setDependencies(Array.isArray(data) ? data : (data.dependencies || []));
         });
-      } catch (err) {
+      } catch {
         setError('Error al cargar dependencias');
       } finally {
         setLoading(false);
@@ -107,15 +107,15 @@ export default function ShowDependencies({ component }) {
         )}
       </CardContent>
     </Card>
-    {addDependencies(dialogOpen, setDialogOpen, component.id)}
-    {showGraph(component.id, component.name, graphOpen, setGraphOpen)}
+    <AddDependenciesDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} componentId={component.id} />
+    <ShowGraphDialog id={component.id} name={component.name} dialogOpen={graphOpen} setDialogOpen={setGraphOpen} />
 
     </div>
 
   );
 }
 
-function addDependencies(dialogOpen, setDialogOpen,componentId){
+function AddDependenciesDialog({ dialogOpen, setDialogOpen, componentId }){
   const [dependencyId, setDependencyId] = useState('');
  const insertDependency = async (componentId, dependencyId) => {
     try {
@@ -155,7 +155,7 @@ function addDependencies(dialogOpen, setDialogOpen,componentId){
   )
 }
 
-function showGraph(id, name, dialogOpen, setDialogOpen){
+function ShowGraphDialog({ id, name, dialogOpen, setDialogOpen }){
 
   return (
     <div>

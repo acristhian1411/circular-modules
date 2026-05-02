@@ -60,7 +60,7 @@ export default function ComponentList() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {components.map((c) => (
+          {components != null && components.length > 0 && components.map((c) => (
             <TableRow key={c.id}>
               <TableCell>{c.id}</TableCell>
               <TableCell>{c.name}</TableCell>

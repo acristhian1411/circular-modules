@@ -1,97 +1,94 @@
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
-/**
- * Fetches all components
- * @returns {Promise<Array>} A promise that resolves to an array of components
- * @throws {Error} If the network request fails
- */
-export async function fetchComponents() {
-  const res = await fetch(`${API_BASE}/components`);
-  return res.json();
+function buildUrl(path, query) {
+  const url = new URL(`${API_BASE}${path}`);
+  if (query) {
+    Object.entries(query).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        url.searchParams.set(key, String(value));
+      }
+    });
+  }
+  return url.toString();
 }
 
-export async function addDependency(componentId, dependencyId) {
-    const res = await fetch(`${API_BASE}/components/${componentId}/dependencies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dependencyId }),
-    }
-    );
-    return res.json();
+async function request(path, options = {}, query) {
+  const response = await fetch(buildUrl(path, query), {
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body.error || `Request failed (${response.status})`);
+  }
+  return body;
 }
 
-export async function getDependencies(componentId) {
-    const res = await fetch(`${API_BASE}/components/${componentId}/dependencies`);
-    return res.json();
+export function listComponents(filters = {}) {
+  return request('/components', { method: 'GET' }, filters);
 }
 
-export async function getDependents(componentId) {
-    const res = await fetch(`${API_BASE}/components/${componentId}/getDependents`);
-    return res.json();
+export function getComponent(id) {
+  return request(`/components/${id}`);
 }
 
-/**
- * Creates a new component
- * @param {Object} data - The component data to create
- * @returns {Promise<Object>} The create response data
- * @throws {Error} If the network request fails
- */
-export async function createComponent(data) {
-  const res = await fetch(`${API_BASE}/components`, {
+export function getComponentChildren(id) {
+  return request(`/components/${id}/children`);
+}
+
+export function createComponent(data) {
+  return request('/components', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  return res.json();
 }
 
-/**
- * Updates a component by ID
- * @param {string|number} id - The ID of the component to update
- * @param {Object} data - The component data to update
- * @returns {Promise<Object>} The update response data
- * @throws {Error} If the network request fails
- */
-export async function updateComponent(id, data) {
-  const res = await fetch(`${API_BASE}/components/${id}`, {
+export function updateComponent(id, data) {
+  return request(`/components/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  return res.json();
 }
 
-/**
- * Deletes a component by ID
- * @param {string|number} id - The ID of the component to delete
- * @returns {Promise<Object>} The delete response data
- * @throws {Error} If the network request fails
- */
-export async function deleteComponent(id) {
-  const res = await fetch(`${API_BASE}/components/${id}`, {
+export function deleteComponent(id) {
+  return request(`/components/${id}`, { method: 'DELETE' });
+}
+
+export function listDependencies(id) {
+  return request(`/components/${id}/dependencies`);
+}
+
+export function listDependents(id) {
+  return request(`/components/${id}/dependents`);
+}
+
+export function getImpactTree(id) {
+  return request(`/components/${id}/impact-tree`);
+}
+
+export function createDependency(componentId, payload) {
+  return request(`/components/${componentId}/dependencies`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteDependency(componentId, dependsOnId) {
+  return request(`/components/${componentId}/dependencies/${dependsOnId}`, {
     method: 'DELETE',
   });
-  return res.json();
 }
 
-/**
- * Fetches a component and its dependencies by ID
- * @param {string|number} id - The ID of the component to fetch
- * @returns {Promise<Object>} The component data with its dependencies
- * @throws {Error} If the network request fails
- */
-export async function getComponentWithDependencies(id) {
-  const res = await fetch(`${API_BASE}/components/${id}/dependencies`);
-  return res.json();
-}
+// Compatibility aliases for existing components.
+export const fetchComponents = listComponents;
+export const getDependencies = listDependencies;
+export const getDependents = listDependents;
+export const getComponentWithDependencies = listDependencies;
 
-/**
- * Fetches a component and its children by ID
- * @param {string|number} id - The ID of the component to fetch
- * @returns {Promise<Object>} The component data with its children
- * @throws {Error} If the network request fails
- */
-export async function getComponentChildren(id){
-    const res = await fetch(`${API_BASE}/components/${id}/children`);
-    return res.json();
+export function addDependency(componentId, dependencyId, criticality = 'optional') {
+  return createDependency(componentId, {
+    depends_on_id: Number(dependencyId),
+    criticality,
+  });
 }
