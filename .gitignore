@@ -157,3 +157,6 @@ sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/node,react
 backend/db/docs.db
+
+.planning
+.github
