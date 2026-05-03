@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   AppBar,
+  Button,
   Box,
   Drawer,
   IconButton,
@@ -26,11 +27,11 @@ const drawerWidth = 276;
 const navItems = [
   { label: 'Explorer', path: '/', icon: <DashboardOutlinedIcon /> },
   { label: 'Components', path: '/components', icon: <WidgetsOutlinedIcon /> },
-  { label: 'Editor', path: '/editor', icon: <EditNoteOutlinedIcon /> },
+  // { label: 'Editor', path: '/editor', icon: <EditNoteOutlinedIcon /> },
   { label: 'Impact Visualizer', path: '/visualizer', icon: <HubOutlinedIcon /> },
 ];
 
-export default function AppShell({ children }) {
+export default function AppShell({ children, user, onLogout }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -109,6 +110,12 @@ export default function AppShell({ children }) {
               ),
             }}
           />
+          <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+            {user?.email || user?.name || 'Usuario autenticado'}
+          </Typography>
+          <Button color="inherit" onClick={onLogout}>
+            Salir
+          </Button>
         </Toolbar>
       </AppBar>
 

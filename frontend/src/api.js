@@ -1,4 +1,18 @@
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
+const TOKEN_STORAGE_KEY = 'circular_auth_access_token';
+
+export function getStoredAccessToken() {
+  return localStorage.getItem(TOKEN_STORAGE_KEY);
+}
+
+export function storeAccessToken(token) {
+  if (!token) return;
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+}
+
+export function clearAccessToken() {
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+}
 
 function buildUrl(path, query) {
   const url = new URL(`${API_BASE}${path}`);
@@ -12,17 +26,50 @@ function buildUrl(path, query) {
   return url.toString();
 }
 
-async function request(path, options = {}, query) {
+async function request(path, options = {}, query, requestOptions = {}) {
+  const { skipAuth = false } = requestOptions;
+  const token = getStoredAccessToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(!skipAuth && token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
+
   const response = await fetch(buildUrl(path, query), {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers,
     ...options,
   });
 
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (response.status === 401) {
+      clearAccessToken();
+    }
     throw new Error(body.error || `Request failed (${response.status})`);
   }
   return body;
+}
+
+export async function login(email, password) {
+  const body = await request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  }, undefined, { skipAuth: true });
+
+  if (!body?.access_token) {
+    throw new Error('Auth service did not return an access token');
+  }
+
+  storeAccessToken(body.access_token);
+  return body;
+}
+
+export function getCurrentUser() {
+  return request('/auth/me', { method: 'GET' });
+}
+
+export function logout() {
+  clearAccessToken();
 }
 
 export function listComponents(filters = {}) {
