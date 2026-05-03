@@ -1,4 +1,3 @@
-
 # 🧩 Circular Docs
 
 Aplicación web para gestionar componentes de software y sus dependencias, ideal para proyectos modulares donde es importante tener un control claro de cómo se relacionan los diferentes elementos del sistema.
@@ -30,10 +29,20 @@ Aplicación web para gestionar componentes de software y sus dependencias, ideal
 
 3. **Configurar variables de entorno**
 
-   Crear un archivo `.env` en la raíz con al menos:
+   Backend (`/.env`):
 
    ```env
-   VITE_API_BASE=http://localhost:3000/api
+   PORT=3001
+   AUTH_BASE_URL=http://localhost
+   AUTH_CLIENT_ID=...
+   AUTH_CLIENT_SECRET=...
+   AUTH_USERINFO_URL=http://localhost/api/user
+   ```
+
+   Frontend (`/frontend/.env`):
+
+   ```env
+   VITE_API_BASE=http://localhost:3001/api
    ```
 
 4. **Ejecutar en desarrollo**
@@ -56,25 +65,31 @@ Aplicación web para gestionar componentes de software y sus dependencias, ideal
 
 ## 📁 Estructura principal
 
-   ```
-   src/
-   ├── api/
-   │   └── component.js          # Funciones de consumo de API
-   ├── components/
-   │   └── ComponentList.jsx     # Lista de componentes
-   │   └── ComponentDetail.jsx   # Detalle + dependencias
-   ├── App.jsx                   # Root del enrutamiento
-   ├── main.jsx                  # Entrada de la app
-   ```
+```
+src/
+├── api/
+│   └── component.js          # Funciones de consumo de API
+├── components/
+│   └── ComponentList.jsx     # Lista de componentes
+│   └── ComponentDetail.jsx   # Detalle + dependencias
+├── App.jsx                   # Root del enrutamiento
+├── main.jsx                  # Entrada de la app
+```
 
 ## 🧪 Estado del proyecto
 
 ✅ CRUD de componentes
 ✅ Visualización de dependencias
-⏳ Agregar dependencia vía interfaz
-⏳ Autenticación y roles (pendiente)
+✅ Agregar dependencia vía interfaz
+✅ Autenticación con Laravel Passport (login + rutas protegidas)
+
+## 🔐 Flujo de autenticación
+
+- Frontend inicia sesión contra `POST /api/auth/login`.
+- Backend solicita token OAuth2 al servicio Laravel (`/oauth/token`) con Password Grant.
+- Frontend almacena `access_token` y lo envía como Bearer Token.
+- Backend protege `/api/components/*` validando token contra `AUTH_USERINFO_URL`.
 
 ---
 
 Contribuciones, ideas o bugs son bienvenidos. ¡Gracias por usar Circular Docs!
-

@@ -144,22 +144,43 @@ const MAX_IMPACT_DEPTH = 20;
 
 export const getImpactTree = async (db, id) => {
   return await db.all(
-    `WITH RECURSIVE impact_path(id, depth) AS (
-      SELECT cd.component_id, 1
+    `WITH RECURSIVE impact_path(id, tree_parent_id, depth, path) AS (
+      SELECT cd.component_id, cd.depends_on_id, 1,
+             ',' || ? || ',' || cd.component_id || ','
       FROM component_dependencies cd
       WHERE cd.depends_on_id = ?
       UNION
-      SELECT cd.component_id, ip.depth + 1
+      SELECT cd.component_id, cd.depends_on_id, ip.depth + 1,
+             ip.path || cd.component_id || ','
       FROM component_dependencies cd
       JOIN impact_path ip ON cd.depends_on_id = ip.id
       WHERE ip.depth < ?
+        AND INSTR(ip.path, ',' || cd.component_id || ',') = 0
+    ),
+    min_depth AS (
+      SELECT id, MIN(depth) as depth
+      FROM impact_path
+      GROUP BY id
+    ),
+    best_parent AS (
+      SELECT id, tree_parent_id
+      FROM (
+        SELECT 
+          ip.*,
+          ROW_NUMBER() OVER (PARTITION BY ip.id ORDER BY ip.tree_parent_id) as rn
+        FROM impact_path ip
+        JOIN min_depth md 
+          ON md.id = ip.id 
+        AND md.depth = ip.depth
+      )
+      WHERE rn = 1
     )
-    SELECT c.*, MIN(ip.depth) as depth
-    FROM impact_path ip
-    JOIN components c ON c.id = ip.id
-    GROUP BY c.id
-    ORDER BY depth ASC, c.name ASC`,
-    [id, MAX_IMPACT_DEPTH]
+    SELECT c.*, md.depth, bp.tree_parent_id
+    FROM min_depth md
+    JOIN best_parent bp ON bp.id = md.id
+    JOIN components c ON c.id = md.id
+    ORDER BY md.depth ASC, c.name ASC`,
+    [id, id, MAX_IMPACT_DEPTH]
   );
 };
 
