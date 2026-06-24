@@ -59,7 +59,7 @@ function App() {
       <Routes>
         <Route path="/" element={<ExplorerPage />} />
         <Route path="/components" element={<ComponentsPage />} />
-        {/* <Route path="/editor" element={<ComponentEditorPage />} /> */}
+        <Route path="/editor" element={<ComponentEditorPage />} />
         <Route path="/editor/:id" element={<ComponentEditorPage />} />
         <Route path="/visualizer" element={<ImpactVisualizerPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />

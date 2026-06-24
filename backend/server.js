@@ -24,7 +24,7 @@ const startServer = async () => {
   app.use('/api/auth', authRouter());
   app.use('/api/components', requireAuth(), componentRouter(db));
 
-  const PORT = 3001;
+  const PORT = Number(process.env.PORT) || 3001;
   app.listen(PORT, () => {
     console.log(`✅ Backend corriendo en http://localhost:${PORT}`);
   });
