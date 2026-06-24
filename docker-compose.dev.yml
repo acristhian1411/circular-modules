@@ -1,0 +1,17 @@
+services:
+  backend:
+    command: npm run dev:backend
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - backend_db:/app/backend/db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules

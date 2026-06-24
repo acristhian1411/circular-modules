@@ -1,0 +1,13 @@
+node_modules
+frontend/node_modules
+.git
+.github
+.env
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+backend/db/docs.db
+frontend/dist
+dist
+coverage

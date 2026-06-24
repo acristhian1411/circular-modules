@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - .env
+    extra_hosts:
+      - "auth.test:host-gateway"
+    ports:
+      - "3001:3001"
+    volumes:
+      - backend_db:/app/backend/db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        VITE_API_BASE: http://localhost:3001/api
+    environment:
+      VITE_BACKEND_TARGET: http://localhost:3001
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  backend_db:
